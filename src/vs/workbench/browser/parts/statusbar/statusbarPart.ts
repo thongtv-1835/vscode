@@ -673,6 +673,12 @@ class StatusbarEntryItem extends Disposable {
 		// Update: Text
 		if (!this.entry || entry.text !== this.entry.text) {
 			this.label.text = entry.text;
+
+			if (entry.text) {
+				show(this.labelContainer);
+			} else {
+				hide(this.labelContainer);
+			}
 		}
 
 		// Update: Tooltip
@@ -689,12 +695,12 @@ class StatusbarEntryItem extends Disposable {
 			if (entry.command) {
 				this.commandListener = addDisposableListener(this.labelContainer, EventType.CLICK, () => this.executeCommand(entry.command!, entry.arguments));
 
-				removeClass(this.labelContainer, 'disabled'); // enable click/hover feedback
+				removeClass(this.labelContainer, 'disabled');
 			} else {
 				dispose(this.commandListener);
 				this.commandListener = undefined;
 
-				addClass(this.labelContainer, 'disabled'); // disable click/hover feedback
+				addClass(this.labelContainer, 'disabled');
 			}
 		}
 
