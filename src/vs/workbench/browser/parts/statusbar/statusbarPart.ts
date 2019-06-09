@@ -34,6 +34,7 @@ import { StandardMouseEvent } from 'vs/base/browser/mouseEvent';
 import { ToggleStatusbarVisibilityAction } from 'vs/workbench/browser/actions/layoutActions';
 import { Separator } from 'vs/base/browser/ui/actionbar/actionbar';
 import { values } from 'vs/base/common/map';
+import { equals } from 'vs/base/common/objects';
 
 interface IPendingStatusbarEntry {
 	id: string;
@@ -409,15 +410,6 @@ export class StatusbarPart extends Part implements IStatusbarService {
 
 		return {
 			update: entry => {
-
-				// Update beak
-				if (entry.showBeak) {
-					addClass(itemContainer, 'has-beak');
-				} else {
-					removeClass(itemContainer, 'has-beak');
-				}
-
-				// Update entry
 				item.update(entry);
 			},
 			dispose: () => {
@@ -641,6 +633,7 @@ export class StatusbarPart extends Part implements IStatusbarService {
 
 class StatusbarEntryItem extends Disposable {
 	private entryDisposables: IDisposable[] = [];
+	private lastRenderedState: IStatusbarEntry | undefined;
 
 	constructor(
 		private container: HTMLElement,
@@ -657,13 +650,50 @@ class StatusbarEntryItem extends Disposable {
 	}
 
 	update(entry: IStatusbarEntry): void {
+		if (this.isEqualEntry(entry)) {
+			return; // return early if no state change
+		}
+
+		// Otherwise, clear first...
 		clearNode(this.container);
 		this.entryDisposables = dispose(this.entryDisposables);
 
+		// ...then render
 		this.render(entry);
 	}
 
+	private isEqualEntry(other: IStatusbarEntry): boolean {
+
+		// Not rendered yet
+		if (!this.lastRenderedState) {
+			return false;
+		}
+
+		// Simple equals when arguments are same
+		if (other.arguments === this.lastRenderedState.arguments) {
+			return other.text === this.lastRenderedState.text &&
+				other.tooltip === this.lastRenderedState.tooltip &&
+				other.showBeak === this.lastRenderedState.showBeak &&
+				other.backgroundColor === this.lastRenderedState.backgroundColor &&
+				other.color === this.lastRenderedState.color &&
+				other.command === this.lastRenderedState.command;
+		}
+
+		// Full equals check to include arguments
+		return equals(other, this.lastRenderedState);
+	}
+
 	private render(entry: IStatusbarEntry): void {
+
+		// Remember state
+		this.lastRenderedState = entry;
+
+		// Update beak
+		if (entry.showBeak) {
+			addClass(this.container, 'has-beak');
+		} else {
+			removeClass(this.container, 'has-beak');
+		}
 
 		// Text Container
 		let textContainer: HTMLElement;
