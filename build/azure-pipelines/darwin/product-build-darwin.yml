@@ -41,6 +41,7 @@ steps:
 
 - script: |
     set -e
+    VSCODE_WEB_BUILD="true"
     VSCODE_MIXIN_PASSWORD="$(github-distro-mixin-password)" \
     AZURE_STORAGE_ACCESS_KEY="$(ticino-storage-key)" \
     ./build/azure-pipelines/darwin/build.sh
@@ -53,10 +54,10 @@ steps:
     # yarn smoketest -- --build "$(agent.builddirectory)/VSCode-darwin/$APP_NAME"
   displayName: Run unit tests
 
-- script: |
-    set -e
-    ./scripts/test-integration.sh --build --tfs "Integration Tests"
-  displayName: Run integration tests
+# - script: |
+#     set -e
+#     ./scripts/test-integration.sh --build --tfs "Integration Tests"
+#   displayName: Run integration tests
 
 - script: |
     set -e
