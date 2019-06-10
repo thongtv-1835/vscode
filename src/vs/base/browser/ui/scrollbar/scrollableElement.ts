@@ -5,6 +5,7 @@
 
 import 'vs/css!./media/scrollbars';
 import * as dom from 'vs/base/browser/dom';
+import * as browser from 'vs/base/browser/browser';
 import { FastDomNode, createFastDomNode } from 'vs/base/browser/fastDomNode';
 import { IMouseEvent, StandardWheelEvent, IMouseWheelEvent } from 'vs/base/browser/mouseEvent';
 import { ScrollbarHost } from 'vs/base/browser/ui/scrollbar/abstractScrollbar';
@@ -312,7 +313,11 @@ export abstract class AbstractScrollableElement extends Widget {
 				this._onMouseWheel(new StandardWheelEvent(browserEvent));
 			};
 
-			this._mouseWheelToDispose.push(dom.addDisposableListener(this._listenOnDomNode, 'mousewheel', onMouseWheel));
+			if (browser.isFirefox) {
+				this._mouseWheelToDispose.push(dom.addDisposableListener(this._listenOnDomNode, 'mousewheel', onMouseWheel)); this._register(dom.addDisposableListener(this._listenOnDomNode, 'DOMMouseScroll', onMouseWheel, true));
+			} else {
+				this._register(dom.addDisposableListener(this._listenOnDomNode, 'mousewheel', onMouseWheel, true));
+			}
 		}
 	}
 
